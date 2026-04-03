@@ -47,7 +47,7 @@ Your AI Agent                    hidrix-tools                     Internet
 | Agent / Platform | Setup | Status |
 |---|---|---|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) / Claude Desktop | `settings.json` → mcpServers | ✅ Tested |
-| [pi](https://github.com/mariozechner/pi-coding-agent) | MCP config | ✅ Tested |
+| [pi](https://github.com/mariozechner/pi-coding-agent) | Native extension (no MCP) | ✅ Tested |
 | [OpenClaw](https://github.com/openclaw/openclaw) | `openclaw.json` → mcp_servers | ✅ Compatible |
 | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | `config.yaml` → mcp_servers | ✅ Compatible |
 | [Cursor](https://cursor.sh) | MCP settings | ✅ Compatible |
@@ -164,6 +164,15 @@ mcp_servers:
     command: "bun"
     args: ["run", "/path/to/hidrix-tools/server.ts"]
 ```
+
+**pi (coding agent)** — copy extension:
+
+```bash
+cp -r integrations/pi-extension ~/.pi/agent/extensions/hidrix-tools
+# Then /reload in pi
+```
+
+See [integrations/pi-extension/README.md](integrations/pi-extension/README.md) for details.
 
 **Standalone** (any MCP client):
 

@@ -1,0 +1,9 @@
+{
+  "name": "pi-ext-hidrix-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bridge hidrix-tools into pi as native custom tools",
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}
