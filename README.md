@@ -42,24 +42,28 @@ SIMILAR_WEB_RAPIDAPI_KEY=your-key          # Separate key for SimilarWeb
 
 ## Usage
 
-### With Claude Code
+### Quick setup (Claude Code)
 
-Add to `~/.claude/settings.json`:
+```bash
+git clone https://github.com/sonpiaz/hidrix-tools.git ~/.hidrix-tools
+cd ~/.hidrix-tools && bun install && cp .env.example .env
+# Add your API keys to .env
+```
+
+Then add to `~/.claude/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "hidrix-tools": {
       "command": "bun",
-      "args": ["run", "/path/to/hidrix-tools/server.ts"]
+      "args": ["run", "~/.hidrix-tools/server.ts"]
     }
   }
 }
 ```
 
-### With Pi agent
-
-Add to pi's MCP config — same format as Claude Code.
+Works with Pi agent, OpenClaw, or any MCP client — same config format.
 
 ### Standalone
 
