@@ -61,7 +61,9 @@ Your AI Agent                    hidrix-tools                     Internet
 | Tool | Source | What it does |
 |------|--------|-------------|
 | `web_search` | Brave Search | Search the web — titles, URLs, descriptions |
-| `x_search` | RapidAPI | Search X/Twitter posts |
+| `x_search` | GetXAPI / RapidAPI | Search X/Twitter with engagement data (likes, retweets, views) |
+| `x_thread_reader` | GetXAPI | Read full X threads, articles, and tweet replies |
+| `x_user_posts` | GetXAPI | Get recent posts from a specific X user with engagement |
 | `reddit_search` | RapidAPI | Search Reddit posts and comments |
 | `youtube_search` | RapidAPI | Search YouTube videos |
 | `tiktok_search` | RapidAPI | Search TikTok videos |
@@ -174,7 +176,8 @@ Tools are auto-skipped if their API keys are missing — only configure what you
 | Key | Tools | Free Tier | Get it |
 |-----|-------|-----------|--------|
 | `BRAVE_API_KEY` | web_search | 2,000 queries/month | [api.search.brave.com](https://api.search.brave.com) |
-| `RAPIDAPI_KEY` | x_search, reddit_search, youtube_search, tiktok_search | Varies | [rapidapi.com](https://rapidapi.com) |
+| `GETXAPI_KEY` | x_search, x_thread_reader, x_user_posts | $0.001/call, no subscription | [getxapi.com](https://getxapi.com) |
+| `RAPIDAPI_KEY` | x_search (fallback), reddit_search, youtube_search, tiktok_search | Varies | [rapidapi.com](https://rapidapi.com) |
 | `APIFY_API_TOKEN` | facebook_scraper (group/page/search) | $5/month credit | [console.apify.com](https://console.apify.com/settings/integrations) |
 | `META_ADS_ACCESS_TOKEN` | facebook_scraper (ads mode) | Free, unlimited | [facebook.com/ads/library/api](https://www.facebook.com/ads/library/api/) |
 
@@ -200,7 +203,9 @@ hidrix-tools/
 │   ├── _template/             — Copy this to create a new tool
 │   ├── web-search/            — Brave Search
 │   ├── web-fetch/             — URL → markdown
-│   ├── x-search/              — X/Twitter search
+│   ├── x-search/              — X/Twitter search (GetXAPI + RapidAPI fallback)
+│   ├── x-thread-reader/       — Read X threads & articles
+│   ├── x-user-posts/          — User timeline with engagement
 │   ├── reddit-search/         — Reddit search
 │   ├── youtube-search/        — YouTube search
 │   ├── tiktok-search/         — TikTok search
@@ -211,6 +216,7 @@ hidrix-tools/
 ├── lib/
 │   ├── tool-registry.ts       — Auto-discovery engine
 │   ├── rapidapi.ts            — Shared RapidAPI client
+│   ├── getxapi.ts             — GetXAPI client (X/Twitter)
 │   ├── apify.ts               — Apify REST client
 │   ├── meta-ads.ts            — Meta Ad Library API client
 │   └── readability.ts         — HTML → markdown extraction
