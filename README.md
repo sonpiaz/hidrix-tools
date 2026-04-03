@@ -63,22 +63,39 @@ bun run server.ts
 | Brave Search | 2,000 queries/month | [api.search.brave.com](https://api.search.brave.com) |
 | RapidAPI | Varies by API | [rapidapi.com](https://rapidapi.com) |
 
+## Add Your Own Tool
+
+Tools are auto-discovered — no changes to `server.ts` needed.
+
+```bash
+cp -r tools/_template tools/your-tool-name
+# Edit tools/your-tool-name/index.ts
+bun run server.ts
+# [hidrix-tools] ✓ your_tool_name
+```
+
+See [docs/adding-a-tool.md](docs/adding-a-tool.md) for the full guide.
+
 ## Project Structure
 
 ```
 hidrix-tools/
-├── server.ts              — MCP server entry point
+├── server.ts                — Auto-discovers and registers tools
 ├── tools/
-│   ├── web-search.ts      — Brave Search
-│   ├── web-fetch.ts       — URL → markdown (Readability)
-│   ├── x-search.ts        — X/Twitter search
-│   ├── reddit-search.ts   — Reddit search
-│   ├── youtube-search.ts  — YouTube search
-│   ├── tiktok-search.ts   — TikTok search
-│   └── similarweb.ts      — Traffic analytics
-└── lib/
-    ├── rapidapi.ts        — Shared RapidAPI client
-    └── readability.ts     — HTML → markdown extraction
+│   ├── _template/           — Copy this to create a new tool
+│   ├── web-search/          — Brave Search
+│   ├── web-fetch/           — URL → markdown (Readability)
+│   ├── x-search/            — X/Twitter search
+│   ├── reddit-search/       — Reddit search
+│   ├── youtube-search/      — YouTube search
+│   ├── tiktok-search/       — TikTok search
+│   └── similarweb/          — Traffic analytics
+├── lib/
+│   ├── tool-registry.ts     — Auto-discovery engine
+│   ├── rapidapi.ts          — Shared RapidAPI client
+│   └── readability.ts       — HTML → markdown extraction
+└── docs/
+    └── adding-a-tool.md     — Tool authoring guide
 ```
 
 ## Tech Stack

@@ -9,10 +9,15 @@ Thanks for your interest in contributing to hidrix-tools!
 
 ## Adding a New Tool
 
-1. Create `tools/your-tool.ts` following the pattern in existing tools
-2. Import and register in `server.ts`
-3. Add to the tools table in `README.md`
-4. Test with `bun run server.ts`
+Tools are auto-discovered — no edits to `server.ts` needed.
+
+```bash
+cp -r tools/_template tools/your-tool-name
+# Edit tools/your-tool-name/index.ts
+bun run server.ts
+```
+
+See [docs/adding-a-tool.md](docs/adding-a-tool.md) for the full guide with examples.
 
 ## Submitting PRs
 

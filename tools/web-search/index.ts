@@ -1,10 +1,6 @@
-/**
- * Web search via Brave Search API.
- * Free tier: 2000 queries/month.
- * Docs: https://api.search.brave.com/app/documentation/web-search
- */
-
-import { requireEnv } from "../lib/rapidapi.js";
+import { z } from "zod";
+import type { ToolDefinition } from "../../lib/tool-registry.js";
+import { requireEnv } from "../../lib/rapidapi.js";
 
 interface BraveResult {
   title: string;
@@ -12,7 +8,7 @@ interface BraveResult {
   description: string;
 }
 
-export async function webSearch(query: string, count: number = 5): Promise<string> {
+async function execute({ query, count }: { query: string; count: number }): Promise<string> {
   const apiKey = requireEnv("BRAVE_API_KEY");
 
   const url = new URL("https://api.search.brave.com/res/v1/web/search");
@@ -32,14 +28,23 @@ export async function webSearch(query: string, count: number = 5): Promise<strin
     return `Brave Search error: ${response.status} ${response.statusText}`;
   }
 
-  const data = await response.json() as { web?: { results?: BraveResult[] } };
+  const data = (await response.json()) as { web?: { results?: BraveResult[] } };
   const results = data.web?.results ?? [];
 
-  if (results.length === 0) {
-    return `No results found for: "${query}"`;
-  }
+  if (results.length === 0) return `No results found for: "${query}"`;
 
   return results
     .map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.description}`)
     .join("\n\n");
 }
+
+export const definition: ToolDefinition = {
+  name: "web_search",
+  description: "Search the web using Brave Search. Returns titles, URLs, and descriptions.",
+  params: {
+    query: z.string().describe("Search query"),
+    count: z.number().min(1).max(20).default(5).describe("Number of results (1-20)"),
+  },
+  envVars: ["BRAVE_API_KEY"],
+  execute,
+};

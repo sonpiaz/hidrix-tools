@@ -1,27 +1,18 @@
-/**
- * X/Twitter search via RapidAPI.
- * Ported from Affitor XClient.
- */
+import { z } from "zod";
+import type { ToolDefinition } from "../../lib/tool-registry.js";
+import { rapidApiGet, requireEnv } from "../../lib/rapidapi.js";
 
-import { rapidApiGet, requireEnv } from "../lib/rapidapi.js";
-
-export async function xSearch(query: string): Promise<string> {
+async function execute({ query }: { query: string }): Promise<string> {
   const config = {
     baseUrl: requireEnv("X_SEARCH_URL"),
     host: requireEnv("X_API_HOST"),
     apiKey: requireEnv("RAPIDAPI_KEY"),
   };
 
-  const result = await rapidApiGet(config, "", {
-    query,
-    search_type: "Top",
-  });
-
+  const result = await rapidApiGet(config, "", { query, search_type: "Top" });
   if (result.error) return result.error;
 
   const data = result.data as any;
-
-  // Format results based on common X API response shapes
   if (data?.results && Array.isArray(data.results)) {
     return data.results
       .slice(0, 10)
@@ -34,6 +25,15 @@ export async function xSearch(query: string): Promise<string> {
       .join("\n\n");
   }
 
-  // Return raw if structure is unexpected
   return JSON.stringify(data, null, 2).slice(0, 5000);
 }
+
+export const definition: ToolDefinition = {
+  name: "x_search",
+  description: "Search X/Twitter posts. Returns top tweets matching the query.",
+  params: {
+    query: z.string().describe("Search query for X/Twitter"),
+  },
+  envVars: ["RAPIDAPI_KEY", "X_SEARCH_URL", "X_API_HOST"],
+  execute,
+};
