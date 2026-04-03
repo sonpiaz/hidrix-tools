@@ -24,6 +24,9 @@
 | `youtube_search` | RapidAPI | Search YouTube videos |
 | `tiktok_search` | RapidAPI | Search TikTok videos |
 | `similarweb` | RapidAPI | Website traffic analytics |
+| `facebook_scraper` | Apify + Meta API | Scrape FB groups, pages, keyword search, or ads library |
+| `content_scorer` | Built-in | Score and rank posts by weighted engagement + time-decay |
+| `content_analyzer` | Built-in | Topic clusters, content patterns, timing trends, author leaderboard |
 
 ## Install
 
