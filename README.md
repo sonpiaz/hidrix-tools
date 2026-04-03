@@ -1,7 +1,7 @@
 <h1 align="center">hidrix-tools</h1>
 
 <p align="center">
-  MCP server with web search, social media search, and web fetch tools for any AI agent.
+  MCP tool server that gives any AI agent the ability to search, scrape, and analyze content across the internet.
 </p>
 
 <p align="center">
@@ -13,24 +13,114 @@
 
 ---
 
+## What is hidrix-tools?
+
+AI agents like Claude, OpenClaw, Hermes, Cursor, and pi can read files and write code — but they can't search the web, read social media, or scrape data on their own.
+
+**hidrix-tools fixes that.** It's an [MCP](https://modelcontextprotocol.io/) server that provides tools for web search, social media search, Facebook scraping, content analysis, and more. Plug it into any agent that supports MCP — no vendor lock-in.
+
+```
+Your AI Agent                    hidrix-tools                     Internet
+┌──────────┐     MCP protocol    ┌──────────────┐                ┌─────────┐
+│ Claude   │ ◄─────────────────► │ web_search   │ ◄────────────► │ Brave   │
+│ OpenClaw │                     │ x_search     │                │ X/Twitter│
+│ Hermes   │                     │ reddit_search│                │ Reddit  │
+│ Cursor   │                     │ facebook_    │                │ Facebook│
+│ pi       │                     │   scraper    │                │ YouTube │
+│ Codex    │                     │ content_     │                │ TikTok  │
+│ ...      │                     │   scorer     │                │ Meta Ads│
+└──────────┘                     └──────────────┘                └─────────┘
+```
+
+## Why use hidrix-tools?
+
+| Without hidrix-tools | With hidrix-tools |
+|---|---|
+| Agent can only read local files | Agent can search web, read articles, scrape social media |
+| "I don't have access to the internet" | "Here are the top 10 Reddit posts about your topic this week" |
+| Manual copy-paste research | Agent autonomously gathers data from 7+ platforms |
+| No competitive intelligence | Agent scrapes competitor FB pages, analyzes engagement patterns |
+| One platform at a time | Cross-platform research in a single conversation |
+
+## Compatible agents
+
+| Agent / Platform | Setup | Status |
+|---|---|---|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) / Claude Desktop | `settings.json` → mcpServers | ✅ Tested |
+| [pi](https://github.com/mariozechner/pi-coding-agent) | MCP config | ✅ Tested |
+| [OpenClaw](https://github.com/openclaw/openclaw) | `openclaw.json` → mcp_servers | ✅ Compatible |
+| [Hermes Agent](https://github.com/NousResearch/hermes-agent) | `config.yaml` → mcp_servers | ✅ Compatible |
+| [Cursor](https://cursor.sh) | MCP settings | ✅ Compatible |
+| [Codex CLI](https://github.com/openai/codex) | MCP config | ✅ Compatible |
+| Any MCP client | stdio transport | ✅ |
+
 ## Tools
 
-| Tool | Source | Description |
+### Search
+
+| Tool | Source | What it does |
 |------|--------|-------------|
-| `web_search` | Brave Search | Web search with titles, URLs, descriptions |
-| `web_fetch` | Mozilla Readability | Fetch any URL → clean markdown |
+| `web_search` | Brave Search | Search the web — titles, URLs, descriptions |
 | `x_search` | RapidAPI | Search X/Twitter posts |
 | `reddit_search` | RapidAPI | Search Reddit posts and comments |
 | `youtube_search` | RapidAPI | Search YouTube videos |
 | `tiktok_search` | RapidAPI | Search TikTok videos |
-| `similarweb` | RapidAPI | Website traffic analytics |
-| `facebook_scraper` | Apify + Meta API | Scrape FB groups, pages, keyword search, or ads library |
+
+### Scrape & Fetch
+
+| Tool | Source | What it does |
+|------|--------|-------------|
+| `web_fetch` | Mozilla Readability | Fetch any URL → clean readable markdown |
+| `facebook_scraper` | Apify + Meta API | Scrape FB groups, pages, keyword search, or Meta Ad Library |
+
+### Analyze
+
+| Tool | Source | What it does |
+|------|--------|-------------|
 | `content_scorer` | Built-in | Score and rank posts by weighted engagement + time-decay |
 | `content_analyzer` | Built-in | Topic clusters, content patterns, timing trends, author leaderboard |
 
+### Intel
+
+| Tool | Source | What it does |
+|------|--------|-------------|
+| `similarweb` | RapidAPI | Website traffic, rank, engagement analytics |
+
+## Real-world use cases
+
+### 🔍 Research agent
+> "Find top 10 posts about AI agents on Reddit this week, compare with X/Twitter, summarize the trends"
+
+Agent uses: `reddit_search` → `x_search` → `content_analyzer`
+
+### 📊 Content pipeline
+> "Scrape 5 Facebook groups about marketing VN, rank top 100 posts by engagement, analyze patterns"
+
+Agent uses: `facebook_scraper` (group mode) → `content_scorer` → `content_analyzer`
+
+### 🕵️ Competitive intelligence
+> "What ads is competitor X running on Facebook? What's their messaging strategy?"
+
+Agent uses: `facebook_scraper` (ads mode) → Meta Ad Library API (free)
+
+### 📰 Article research
+> "Read these 5 articles and summarize the key insights"
+
+Agent uses: `web_fetch` (for each URL)
+
+### 📈 Market research
+> "What are people saying about product X across Reddit, X, and YouTube?"
+
+Agent uses: `reddit_search` + `x_search` + `youtube_search` → `content_analyzer`
+
+### 🏆 Top content discovery
+> "Find the most viral posts in this Facebook group this month"
+
+Agent uses: `facebook_scraper` → `content_scorer` (sort by engagement)
+
 ## Install
 
-### Quick setup (Claude Code)
+### Quick setup
 
 ```bash
 git clone https://github.com/sonpiaz/hidrix-tools.git ~/.hidrix-tools
@@ -38,22 +128,40 @@ cd ~/.hidrix-tools && bun install && cp .env.example .env
 # Add your API keys to .env
 ```
 
-Then add to `~/.claude/settings.json`:
+### Connect to your agent
+
+**Claude Code** — add to `~/.claude/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "hidrix-tools": {
       "command": "bun",
-      "args": ["run", "~/.hidrix-tools/server.ts"]
+      "args": ["run", "/path/to/hidrix-tools/server.ts"]
     }
   }
 }
 ```
 
-Works with Pi agent, OpenClaw, or any MCP client — same config format.
+**OpenClaw** — add to `openclaw.json`:
 
-### Standalone
+```yaml
+mcp_servers:
+  hidrix-tools:
+    command: "bun"
+    args: ["run", "/path/to/hidrix-tools/server.ts"]
+```
+
+**Hermes Agent** — add to `~/.hermes/config.yaml`:
+
+```yaml
+mcp_servers:
+  hidrix-tools:
+    command: "bun"
+    args: ["run", "/path/to/hidrix-tools/server.ts"]
+```
+
+**Standalone** (any MCP client):
 
 ```bash
 bun run server.ts
@@ -61,12 +169,16 @@ bun run server.ts
 
 ## API Keys
 
-| Key | Free Tier | Get it |
-|-----|-----------|--------|
-| Brave Search | 2,000 queries/month | [api.search.brave.com](https://api.search.brave.com) |
-| RapidAPI | Varies by API | [rapidapi.com](https://rapidapi.com) |
+Tools are auto-skipped if their API keys are missing — only configure what you need.
 
-## Add Your Own Tool
+| Key | Tools | Free Tier | Get it |
+|-----|-------|-----------|--------|
+| `BRAVE_API_KEY` | web_search | 2,000 queries/month | [api.search.brave.com](https://api.search.brave.com) |
+| `RAPIDAPI_KEY` | x_search, reddit_search, youtube_search, tiktok_search | Varies | [rapidapi.com](https://rapidapi.com) |
+| `APIFY_API_TOKEN` | facebook_scraper (group/page/search) | $5/month credit | [console.apify.com](https://console.apify.com/settings/integrations) |
+| `META_ADS_ACCESS_TOKEN` | facebook_scraper (ads mode) | Free, unlimited | [facebook.com/ads/library/api](https://www.facebook.com/ads/library/api/) |
+
+## Add your own tool
 
 Tools are auto-discovered — no changes to `server.ts` needed.
 
@@ -79,29 +191,46 @@ bun run server.ts
 
 See [docs/adding-a-tool.md](docs/adding-a-tool.md) for the full guide.
 
-## Project Structure
+## Project structure
 
 ```
 hidrix-tools/
-├── server.ts                — Auto-discovers and registers tools
+├── server.ts                  — MCP server, auto-discovers tools
 ├── tools/
-│   ├── _template/           — Copy this to create a new tool
-│   ├── web-search/          — Brave Search
-│   ├── web-fetch/           — URL → markdown (Readability)
-│   ├── x-search/            — X/Twitter search
-│   ├── reddit-search/       — Reddit search
-│   ├── youtube-search/      — YouTube search
-│   ├── tiktok-search/       — TikTok search
-│   └── similarweb/          — Traffic analytics
+│   ├── _template/             — Copy this to create a new tool
+│   ├── web-search/            — Brave Search
+│   ├── web-fetch/             — URL → markdown
+│   ├── x-search/              — X/Twitter search
+│   ├── reddit-search/         — Reddit search
+│   ├── youtube-search/        — YouTube search
+│   ├── tiktok-search/         — TikTok search
+│   ├── similarweb/            — Traffic analytics
+│   ├── facebook-scraper/      — FB groups, pages, search, ads
+│   ├── content-scorer/        — Engagement scoring + ranking
+│   └── content-analyzer/      — Topic/pattern/trend analysis
 ├── lib/
-│   ├── tool-registry.ts     — Auto-discovery engine
-│   ├── rapidapi.ts          — Shared RapidAPI client
-│   └── readability.ts       — HTML → markdown extraction
+│   ├── tool-registry.ts       — Auto-discovery engine
+│   ├── rapidapi.ts            — Shared RapidAPI client
+│   ├── apify.ts               — Apify REST client
+│   ├── meta-ads.ts            — Meta Ad Library API client
+│   └── readability.ts         — HTML → markdown extraction
 └── docs/
-    └── adding-a-tool.md     — Tool authoring guide
+    ├── adding-a-tool.md       — Tool authoring guide
+    ├── feedback-and-bug-reporting.md — Bug reporting standards
+    ├── known-issues.md        — Tracked limitations
+    └── ROADMAP.md             — Development roadmap
 ```
 
-## Tech Stack
+## Docs
+
+| Doc | Description |
+|-----|-------------|
+| [Adding a tool](docs/adding-a-tool.md) | How to create a new tool |
+| [Feedback & bug reporting](docs/feedback-and-bug-reporting.md) | Standards for detecting and reporting issues |
+| [Known issues](docs/known-issues.md) | Tracked provider limitations and quirks |
+| [Roadmap](docs/ROADMAP.md) | Development roadmap (X upgrade, Reddit upgrade, LinkedIn, extensions) |
+
+## Tech stack
 
 | Technology | Purpose |
 |-----------|---------|
@@ -110,10 +239,14 @@ hidrix-tools/
 | [MCP SDK](https://modelcontextprotocol.io/) | Agent protocol |
 | [Brave Search](https://brave.com/search/api/) | Web search |
 | [Mozilla Readability](https://github.com/mozilla/readability) | Content extraction |
+| [Apify](https://apify.com/) | Facebook scraping |
+| [Meta Ad Library API](https://www.facebook.com/ads/library/api/) | Ad intelligence (free) |
 
 ## Contributing
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+When reporting bugs, follow [docs/feedback-and-bug-reporting.md](docs/feedback-and-bug-reporting.md).
 
 ## Related
 
