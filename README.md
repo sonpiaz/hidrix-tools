@@ -64,7 +64,9 @@ Your AI Agent                    hidrix-tools                     Internet
 | `x_search` | GetXAPI / RapidAPI | Search X/Twitter with engagement data (likes, retweets, views) |
 | `x_thread_reader` | GetXAPI | Read full X threads, articles, and tweet replies |
 | `x_user_posts` | GetXAPI | Get recent posts from a specific X user with engagement |
-| `reddit_search` | RapidAPI | Search Reddit posts and comments |
+| `reddit_search` | RapidAPI | Search Reddit with full text and engagement data |
+| `reddit_thread_reader` | Reddit JSON API (free) | Read full post + comment tree |
+| `reddit_subreddit_top` | Reddit JSON API (free) | Top posts from any subreddit by time range |
 | `youtube_search` | RapidAPI | Search YouTube videos |
 | `tiktok_search` | RapidAPI | Search TikTok videos |
 
@@ -206,7 +208,9 @@ hidrix-tools/
 │   ├── x-search/              — X/Twitter search (GetXAPI + RapidAPI fallback)
 │   ├── x-thread-reader/       — Read X threads & articles
 │   ├── x-user-posts/          — User timeline with engagement
-│   ├── reddit-search/         — Reddit search
+│   ├── reddit-search/         — Reddit search (upgraded)
+│   ├── reddit-thread-reader/  — Full post + comment tree (free API)
+│   ├── reddit-subreddit-top/  — Subreddit top posts (free API)
 │   ├── youtube-search/        — YouTube search
 │   ├── tiktok-search/         — TikTok search
 │   ├── similarweb/            — Traffic analytics
