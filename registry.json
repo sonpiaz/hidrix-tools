@@ -1,0 +1,195 @@
+{
+  "name": "hidrix-tools",
+  "version": "2.0.0",
+  "description": "MCP tool server that gives any AI agent the ability to search, scrape, and analyze content across the internet.",
+  "repository": "https://github.com/sonpiaz/hidrix-tools",
+  "protocol": "mcp",
+  "integrations": ["claude-code", "pi", "openclaw", "hermes", "cursor", "codex"],
+  "tools": [
+    {
+      "name": "web_search",
+      "category": "search",
+      "description": "Search the web using Brave Search. Returns titles, URLs, and descriptions.",
+      "provider": "Brave Search",
+      "cost": "free (2000/month)",
+      "envVars": ["BRAVE_API_KEY"],
+      "chain": {
+        "suggested_next": ["web_fetch"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "web_fetch",
+      "category": "scrape",
+      "description": "Fetch a URL and extract readable content as markdown. Extracts metadata (author, date, tags). Handles X/Twitter URLs specially.",
+      "provider": "Mozilla Readability + GetXAPI",
+      "cost": "free",
+      "envVars": [],
+      "chain": {
+        "suggested_next": ["content_analyzer"],
+        "feeds_from": ["web_search", "x_search", "reddit_search"]
+      }
+    },
+    {
+      "name": "x_search",
+      "category": "search",
+      "description": "Search X/Twitter posts with full engagement data (likes, retweets, replies, views). Supports advanced operators.",
+      "provider": "GetXAPI / RapidAPI",
+      "cost": "$0.001/call (GetXAPI) or RapidAPI subscription",
+      "envVars": ["GETXAPI_KEY"],
+      "chain": {
+        "suggested_next": ["x_thread_reader", "x_user_posts", "content_scorer"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "x_thread_reader",
+      "category": "scrape",
+      "description": "Read full X/Twitter threads, articles, and tweet replies. Detects multi-tweet threads and assembles in order.",
+      "provider": "GetXAPI",
+      "cost": "$0.003/thread (~3 API calls)",
+      "envVars": ["GETXAPI_KEY"],
+      "chain": {
+        "suggested_next": ["content_analyzer"],
+        "feeds_from": ["x_search"]
+      }
+    },
+    {
+      "name": "x_user_posts",
+      "category": "search",
+      "description": "Get recent posts from a specific X/Twitter user with full engagement data.",
+      "provider": "GetXAPI",
+      "cost": "$0.001/call",
+      "envVars": ["GETXAPI_KEY"],
+      "chain": {
+        "suggested_next": ["content_scorer", "content_analyzer"],
+        "feeds_from": ["x_search"]
+      }
+    },
+    {
+      "name": "reddit_search",
+      "category": "search",
+      "description": "Search Reddit posts with full content and engagement data. Filter by subreddit, sort, time range.",
+      "provider": "RapidAPI",
+      "cost": "RapidAPI subscription",
+      "envVars": ["RAPIDAPI_KEY", "REDDIT_SEARCH_URL", "REDDIT_API_HOST"],
+      "chain": {
+        "suggested_next": ["reddit_thread_reader", "content_scorer"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "reddit_thread_reader",
+      "category": "scrape",
+      "description": "Read full Reddit post with comment tree. Uses free Reddit JSON API — no API key needed.",
+      "provider": "Reddit JSON API",
+      "cost": "free",
+      "envVars": [],
+      "chain": {
+        "suggested_next": ["content_analyzer"],
+        "feeds_from": ["reddit_search", "reddit_subreddit_top"]
+      }
+    },
+    {
+      "name": "reddit_subreddit_top",
+      "category": "search",
+      "description": "Get top posts from a specific subreddit by time range. Free Reddit JSON API.",
+      "provider": "Reddit JSON API",
+      "cost": "free",
+      "envVars": [],
+      "chain": {
+        "suggested_next": ["reddit_thread_reader", "content_scorer"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "facebook_scraper",
+      "category": "scrape",
+      "description": "Scrape Facebook groups, pages, keyword search, or Meta Ad Library. 4 modes: group, page, search, ads.",
+      "provider": "Apify + Meta Ad Library API",
+      "cost": "$1.50-5/1000 posts (Apify) or free (ads mode)",
+      "envVars": ["APIFY_API_TOKEN"],
+      "chain": {
+        "suggested_next": ["content_scorer", "content_analyzer"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "content_scorer",
+      "category": "analyze",
+      "description": "Score and rank posts by weighted engagement with time-decay. Input: JSON array of posts.",
+      "provider": "built-in",
+      "cost": "free",
+      "envVars": [],
+      "chain": {
+        "suggested_next": ["content_analyzer"],
+        "feeds_from": ["facebook_scraper", "x_search", "x_user_posts", "reddit_search", "reddit_subreddit_top"]
+      }
+    },
+    {
+      "name": "content_analyzer",
+      "category": "analyze",
+      "description": "Analyze posts for topic clusters, content patterns, posting time trends, and author leaderboard.",
+      "provider": "built-in",
+      "cost": "free",
+      "envVars": [],
+      "chain": {
+        "suggested_next": [],
+        "feeds_from": ["content_scorer", "facebook_scraper", "x_search", "reddit_search"]
+      }
+    },
+    {
+      "name": "similarweb_traffic",
+      "category": "intel",
+      "description": "Get website traffic analytics — rank, visits, engagement, traffic sources.",
+      "provider": "RapidAPI (SimilarWeb)",
+      "cost": "RapidAPI subscription",
+      "envVars": ["SIMILAR_WEB_RAPIDAPI_KEY", "SIMILAR_WEB_URL", "SIMILAR_WEB_API_HOST"],
+      "chain": {
+        "suggested_next": [],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "youtube_search",
+      "category": "search",
+      "description": "Search YouTube videos. Returns titles, channels, URLs, and descriptions.",
+      "provider": "RapidAPI",
+      "cost": "RapidAPI subscription",
+      "envVars": ["RAPIDAPI_KEY"],
+      "chain": {
+        "suggested_next": ["web_fetch"],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "tiktok_search",
+      "category": "search",
+      "description": "Search TikTok videos with play counts, likes, and descriptions.",
+      "provider": "RapidAPI",
+      "cost": "RapidAPI subscription",
+      "envVars": ["RAPIDAPI_KEY"],
+      "chain": {
+        "suggested_next": ["content_analyzer"],
+        "feeds_from": []
+      }
+    }
+  ],
+  "chains": {
+    "content_research": {
+      "description": "Research trending content across platforms, rank by engagement, analyze patterns",
+      "flow": ["x_search → content_scorer → content_analyzer"],
+      "alt_sources": ["reddit_subreddit_top", "facebook_scraper", "youtube_search", "tiktok_search"]
+    },
+    "competitive_intel": {
+      "description": "Analyze competitor content strategy and ad spend",
+      "flow": ["facebook_scraper(ads) → content_analyzer"],
+      "alt_sources": ["x_user_posts", "similarweb_traffic"]
+    },
+    "deep_read": {
+      "description": "Find content → read in full → analyze",
+      "flow": ["x_search → x_thread_reader → content_analyzer"],
+      "alt_sources": ["reddit_search → reddit_thread_reader", "web_search → web_fetch"]
+    }
+  }
+}
