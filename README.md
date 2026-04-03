@@ -1,10 +1,17 @@
-# hidrix-tools
+<h1 align="center">hidrix-tools</h1>
 
-Standalone MCP server with web search, social media search, and web fetch tools. Works with Claude Code, Pi agent, OpenClaw, or any MCP client.
+<p align="center">
+  MCP server with web search, social media search, and web fetch tools for any AI agent.
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Bun-black.svg)](https://bun.sh/)
-[![MCP](https://img.shields.io/badge/MCP-compatible-purple.svg)](https://modelcontextprotocol.io/)
+<p align="center">
+  <a href="https://github.com/sonpiaz/hidrix-tools/blob/main/LICENSE"><img src="https://img.shields.io/github/license/sonpiaz/hidrix-tools" alt="License" /></a>
+  <a href="https://github.com/sonpiaz/hidrix-tools/stargazers"><img src="https://img.shields.io/github/stars/sonpiaz/hidrix-tools" alt="Stars" /></a>
+  <img src="https://img.shields.io/badge/MCP-compatible-purple" alt="MCP" />
+  <img src="https://img.shields.io/badge/Bun-TypeScript-black" alt="Bun" />
+</p>
+
+---
 
 ## Tools
 
@@ -19,28 +26,6 @@ Standalone MCP server with web search, social media search, and web fetch tools.
 | `similarweb` | RapidAPI | Website traffic analytics |
 
 ## Install
-
-```bash
-git clone https://github.com/sonpiaz/hidrix-tools.git
-cd hidrix-tools
-bun install
-```
-
-## Setup
-
-Copy the example env and add your API keys:
-
-```bash
-cp .env.example .env
-```
-
-```env
-BRAVE_API_KEY=your-brave-search-key        # Free: https://api.search.brave.com
-RAPIDAPI_KEY=your-rapidapi-key             # https://rapidapi.com
-SIMILAR_WEB_RAPIDAPI_KEY=your-key          # Separate key for SimilarWeb
-```
-
-## Usage
 
 ### Quick setup (Claude Code)
 
@@ -96,13 +81,31 @@ hidrix-tools/
     └── readability.ts     — HTML → markdown extraction
 ```
 
+## Tech Stack
+
+| Technology | Purpose |
+|-----------|---------|
+| [Bun](https://bun.sh/) | Runtime |
+| [TypeScript](https://typescriptlang.org/) | Language |
+| [MCP SDK](https://modelcontextprotocol.io/) | Agent protocol |
+| [Brave Search](https://brave.com/search/api/) | Web search |
+| [Mozilla Readability](https://github.com/mozilla/readability) | Content extraction |
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## Related
 
-- [affiliate-skills](https://github.com/Affitor/affiliate-skills) — 45 AI agent skills for affiliate marketing
-- [evox](https://github.com/sonpiaz/evox) — Multi-agent orchestration system
-- [Kapt](https://github.com/sonpiaz/kapt) — macOS screenshot tool
-- [Yap](https://github.com/sonpiaz/yap) — macOS push-to-talk dictation
+- [affiliate-skills](https://github.com/Affitor/affiliate-skills) — 45 AI agent skills
+- [content-pipeline](https://github.com/Affitor/content-pipeline) — AI-powered LinkedIn content generation
+- [Kapt](https://github.com/sonpiaz/kapt) — macOS screenshot tool with annotation & OCR
+- [Yap](https://github.com/sonpiaz/yap) — Push-to-talk dictation for macOS
 
 ## License
 
-[MIT](LICENSE) — Son Piaz
+MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">Built by <a href="https://github.com/sonpiaz">Son Piaz</a></p>
