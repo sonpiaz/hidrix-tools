@@ -84,6 +84,13 @@ Your AI Agent                    hidrix-tools                     Internet
 | `content_scorer` | Built-in | Score and rank posts by weighted engagement + time-decay |
 | `content_analyzer` | Built-in | Topic clusters, content patterns, timing trends, author leaderboard |
 
+### LinkedIn
+
+| Tool | Source | What it does |
+|------|--------|-------------|
+| `linkedin_search` | Apify (no login) | Search LinkedIn posts by keyword with engagement data |
+| `linkedin_profile` | Apify (no login) | Get recent posts from a LinkedIn profile |
+
 ### Intel
 
 | Tool | Source | What it does |
