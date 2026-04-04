@@ -97,6 +97,12 @@ Your AI Agent                    hidrix-tools                     Internet
 |------|--------|-------------|
 | `similarweb` | RapidAPI | Website traffic, rank, engagement analytics |
 
+### Storage & Automation
+
+| Tool | Source | What it does |
+|------|--------|-------------|
+| `data_store` | SQLite (built-in) | Save/query scraped posts, dedup, run history, storage stats |
+
 ## Real-world use cases
 
 ### 🔍 Research agent

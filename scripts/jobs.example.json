@@ -1,0 +1,37 @@
+[
+  {
+    "id": "weekly-reddit-ml",
+    "name": "Weekly r/MachineLearning top posts",
+    "tool": "reddit_subreddit_top",
+    "params": {
+      "subreddit": "MachineLearning",
+      "time": "week",
+      "count": 50,
+      "sort": "top"
+    },
+    "schedule": "weekly"
+  },
+  {
+    "id": "daily-x-ai-agents",
+    "name": "Daily X search: AI agents",
+    "tool": "x_search",
+    "params": {
+      "query": "AI agents min_faves:100",
+      "sort": "top",
+      "count": 20
+    },
+    "schedule": "daily"
+  },
+  {
+    "id": "weekly-linkedin-ai",
+    "name": "Weekly LinkedIn: AI tools trending",
+    "tool": "linkedin_search",
+    "params": {
+      "query": "AI tools",
+      "max_posts": 20,
+      "sort": "engagement",
+      "date_filter": "past-week"
+    },
+    "schedule": "weekly"
+  }
+]
