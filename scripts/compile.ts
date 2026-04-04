@@ -26,6 +26,10 @@ const RAW_DIR = join(KB_DIR, "raw");
 const PEOPLE_DIR = join(KB_DIR, "people");
 const CONCEPTS_DIR = join(KB_DIR, "concepts");
 const OUTPUT_DIR = join(KB_DIR, "output");
+const SIGNALS_DIR = join(KB_DIR, "signals");
+const COMPETITORS_DIR = join(KB_DIR, "competitors");
+const MARKETS_DIR = join(KB_DIR, "markets");
+const IDEAS_DIR = join(KB_DIR, "ideas");
 
 const args = process.argv.slice(2);
 const compileOnly = args.includes("--compile-only");
@@ -337,6 +341,15 @@ async function compile() {
     }
   }
 
+  // ── B2+B3+B5: Signals, Competitors, Ideas ───────
+
+  const signals = extractSignals(allPosts);
+  if (signals.length > 0) {
+    compileSignals(signals, today, dailyEntries);
+    compileCompetitors(allPosts, signals, today, dailyEntries);
+    generateIdeas(signals, today, dailyEntries);
+  }
+
   // ── Write master index ─────────────────────────────────
 
   const indexContent = [
@@ -355,6 +368,23 @@ async function compile() {
     `## Top Concepts`,
     "",
     ...topConcepts.slice(0, 15).map(([c, n]) => `- [[${sanitizeFilename(c)}|${c}]] (${n} mentions)`),
+    "",
+    `## 📡 Signals`,
+    "",
+    `- [[signals/pain-point|Pain Points]]`,
+    `- [[signals/alternative-seeking|Alternative Seeking]]`,
+    `- [[signals/feature-request|Feature Requests]]`,
+    `- [[signals/pricing-signal|Pricing Signals]]`,
+    `- [[signals/positive-signal|Positive Signals]]`,
+    `- [[signals/trend-signal|Trend Signals]]`,
+    "",
+    `## 🏭 Markets`,
+    "",
+    ...Object.values(COMPETITOR_MARKETS).map(({ label }) => `- [[${sanitizeFilename(label)}|${label}]]`),
+    "",
+    `## 💡 Ideas`,
+    "",
+    `- [[ideas/auto-generated|Auto-generated Business Ideas]]`,
     "",
     `## Raw Data`,
     "",
@@ -391,6 +421,384 @@ async function compile() {
   const updatedLog = existingLog.slice(0, titleEnd) + newEntry + "\n" + existingLog.slice(titleEnd);
   writeFileSync(dailyLogPath, updatedLog);
   log(`   📄 _daily-log.md`);
+}
+
+// ── B2: Signal extraction ─────────────────────────────────
+
+const SIGNAL_PATTERNS: Record<string, { keywords: string[]; label: string }> = {
+  pain_point: {
+    keywords: ["expensive", "too costly", "overpriced", "costs too much", "waste of money", "not worth", "terrible", "awful", "frustrating", "broken", "unreliable", "slow", "laggy", "latency"],
+    label: "🔴 Pain Point",
+  },
+  alternative_seeking: {
+    keywords: ["alternative to", "replacement for", "switching from", "moved away from", "instead of", "better than", "looking for", "anyone know"],
+    label: "🔍 Alternative Seeking",
+  },
+  feature_request: {
+    keywords: ["wish it had", "would be great if", "missing feature", "need a way to", "please add", "feature request", "should support", "doesn't support", "can't do"],
+    label: "✨ Feature Request",
+  },
+  pricing_signal: {
+    keywords: ["pricing", "free tier", "rate limit", "too limited", "pay per", "subscription", "credits", "tokens per", "cost per", "$/", "per month", "per minute"],
+    label: "💰 Pricing Signal",
+  },
+  positive_signal: {
+    keywords: ["love", "amazing", "switched to", "game changer", "best tool", "incredible", "impressed", "10x", "blazing fast", "highly recommend"],
+    label: "💚 Positive Signal",
+  },
+  trend_signal: {
+    keywords: ["just launched", "new api", "now supports", "announcing", "just released", "open sourced", "breaking", "first to", "just shipped"],
+    label: "🚀 Trend Signal",
+  },
+};
+
+// B3: Competitor definitions
+const COMPETITOR_MARKETS: Record<string, { competitors: string[]; label: string }> = {
+  "llm-api-gateway": {
+    competitors: ["openrouter", "portkey", "litellm", "helicone", "requesty", "kong ai", "vercel ai gateway", "llm gateway"],
+    label: "LLM API Gateway",
+  },
+  "llm-inference": {
+    competitors: ["together ai", "togetherai", "fireworks ai", "fireworksai", "groq", "anyscale", "modal", "replicate", "deepinfra", "novita"],
+    label: "LLM Inference Provider",
+  },
+  "speech-to-text": {
+    competitors: ["deepgram", "assembly ai", "assemblyai", "whisper", "rev ai", "speechmatics", "google stt"],
+    label: "Speech-to-Text",
+  },
+  "voice-ai": {
+    competitors: ["eleven labs", "elevenlabs", "play.ht", "murf ai", "resemble ai", "cartesia"],
+    label: "Voice AI / TTS",
+  },
+  "ugc-ai": {
+    competitors: ["heygen", "synthesia", "d-id", "colossyan", "elai"],
+    label: "UGC AI / Avatar",
+  },
+  "llm-provider": {
+    competitors: ["openai", "anthropic", "google gemini", "mistral", "cohere", "ai21"],
+    label: "LLM Model Provider",
+  },
+};
+
+interface Signal {
+  type: string;
+  label: string;
+  text: string;
+  author: string;
+  url: string;
+  score: number;
+  platform: string;
+  competitor?: string;
+  market?: string;
+}
+
+function extractSignals(posts: StoredPost[]): Signal[] {
+  const signals: Signal[] = [];
+
+  for (const post of posts) {
+    const text = (post.text || "").toLowerCase();
+    if (text.length < 20) continue;
+
+    // Detect which competitor is mentioned
+    let mentionedCompetitor: string | undefined;
+    let mentionedMarket: string | undefined;
+    for (const [market, { competitors }] of Object.entries(COMPETITOR_MARKETS)) {
+      for (const comp of competitors) {
+        if (text.includes(comp)) {
+          mentionedCompetitor = comp;
+          mentionedMarket = market;
+          break;
+        }
+      }
+      if (mentionedCompetitor) break;
+    }
+
+    // Detect signal types
+    for (const [type, { keywords, label }] of Object.entries(SIGNAL_PATTERNS)) {
+      const matched = keywords.some((kw) => text.includes(kw));
+      if (matched) {
+        signals.push({
+          type,
+          label,
+          text: (post.text || "").slice(0, 300),
+          author: post.author || "unknown",
+          url: post.url || "",
+          score: post.score || 0,
+          platform: post.platform || "",
+          competitor: mentionedCompetitor,
+          market: mentionedMarket,
+        });
+      }
+    }
+  }
+
+  return signals.sort((a, b) => b.score - a.score);
+}
+
+function compileSignals(signals: Signal[], today: string, dailyEntries: string[]) {
+  ensureDir(SIGNALS_DIR);
+
+  const byType: Record<string, Signal[]> = {};
+  for (const s of signals) {
+    if (!byType[s.type]) byType[s.type] = [];
+    byType[s.type].push(s);
+  }
+
+  for (const [type, items] of Object.entries(byType)) {
+    const pattern = SIGNAL_PATTERNS[type];
+    if (!pattern) continue;
+
+    const filename = `${type.replace(/_/g, "-")}.md`;
+    const filepath = join(SIGNALS_DIR, filename);
+
+    const content = [
+      `# ${pattern.label}`,
+      "",
+      `> ${items.length} signals detected. Last updated: ${today}`,
+      "",
+      ...items.slice(0, 30).map((s, i) => {
+        const comp = s.competitor ? ` | Competitor: [[${sanitizeFilename(s.competitor)}]]` : "";
+        return [
+          `### ${i + 1}. (score: ${Math.round(s.score)})${comp}`,
+          `> ${s.text.replace(/\n/g, "\n> ")}`,
+          `— ${s.author}, ${s.platform} | ${s.url}`,
+          "",
+        ].join("\n");
+      }),
+      "---",
+      `Last updated: ${today}`,
+    ].join("\n");
+
+    writeFileSync(filepath, content);
+    log(`   📡 signals/${filename} (${items.length} signals)`);
+  }
+
+  dailyEntries.push(`- 📡 ${signals.length} signals detected: ${Object.entries(byType).map(([t, s]) => `${t}(${s.length})`).join(", ")}`);
+}
+
+// B3: Compile competitor profiles
+function compileCompetitors(posts: StoredPost[], signals: Signal[], today: string, dailyEntries: string[]) {
+  ensureDir(COMPETITORS_DIR);
+
+  // Count mentions per competitor
+  const competitorData: Record<string, {
+    market: string;
+    marketLabel: string;
+    mentions: StoredPost[];
+    signals: Signal[];
+  }> = {};
+
+  for (const [market, { competitors, label }] of Object.entries(COMPETITOR_MARKETS)) {
+    for (const comp of competitors) {
+      const mentions = posts.filter((p) => (p.text || "").toLowerCase().includes(comp));
+      const compSignals = signals.filter((s) => s.competitor === comp);
+
+      if (mentions.length > 0 || compSignals.length > 0) {
+        competitorData[comp] = {
+          market,
+          marketLabel: label,
+          mentions,
+          signals: compSignals,
+        };
+      }
+    }
+  }
+
+  for (const [comp, data] of Object.entries(competitorData)) {
+    const filename = `${sanitizeFilename(comp)}.md`;
+    const filepath = join(COMPETITORS_DIR, filename);
+
+    // Simple sentiment
+    const positive = data.signals.filter((s) => s.type === "positive_signal").length;
+    const negative = data.signals.filter((s) => s.type === "pain_point").length;
+    const neutral = data.mentions.length - positive - negative;
+
+    // Pricing signals
+    const pricingSignals = data.signals.filter((s) => s.type === "pricing_signal");
+    const painPoints = data.signals.filter((s) => s.type === "pain_point");
+    const positives = data.signals.filter((s) => s.type === "positive_signal");
+    const featureReqs = data.signals.filter((s) => s.type === "feature_request");
+
+    const content = [
+      `# ${comp.charAt(0).toUpperCase() + comp.slice(1)}`,
+      "",
+      `> ${data.marketLabel} | Market: [[${sanitizeFilename(data.marketLabel)}]]`,
+      "",
+      `## Mentions`,
+      `- ${data.mentions.length} mentions across collected data`,
+      `- Sentiment: ${positive} positive, ${neutral} neutral, ${negative} negative`,
+      "",
+      ...(pricingSignals.length > 0 ? [
+        `## Pricing Signals`,
+        ...pricingSignals.slice(0, 5).map((s) => `- "${s.text.slice(0, 150)}" — ${s.author}`),
+        "",
+      ] : []),
+      ...(painPoints.length > 0 ? [
+        `## Pain Points`,
+        ...painPoints.slice(0, 5).map((s) => `- "${s.text.slice(0, 150)}" — ${s.author}`),
+        "",
+      ] : []),
+      ...(positives.length > 0 ? [
+        `## Positive Signals`,
+        ...positives.slice(0, 5).map((s) => `- "${s.text.slice(0, 150)}" — ${s.author}`),
+        "",
+      ] : []),
+      ...(featureReqs.length > 0 ? [
+        `## Feature Requests`,
+        ...featureReqs.slice(0, 5).map((s) => `- "${s.text.slice(0, 150)}" — ${s.author}`),
+        "",
+      ] : []),
+      `## Top Posts`,
+      "",
+      ...data.mentions.slice(0, 5).map((p, i) => [
+        `${i + 1}. (score: ${Math.round(p.score)}) ${p.author || "unknown"}`,
+        `   > ${(p.text || "").slice(0, 200)}`,
+        `   ${p.url || ""}`,
+      ].join("\n")),
+      "",
+      `## Related`,
+      `- Market: [[${sanitizeFilename(data.marketLabel)}]]`,
+      `- Signals: [[pain-point]] | [[pricing-signal]] | [[positive-signal]]`,
+      "",
+      "---",
+      `Last updated: ${today} | Sources: ${data.mentions.length} posts`,
+    ].join("\n");
+
+    writeFileSync(filepath, content);
+    log(`   🏢 competitors/${filename} (${data.mentions.length} mentions, ${data.signals.length} signals)`);
+  }
+
+  // Compile market overview pages
+  ensureDir(MARKETS_DIR);
+  for (const [market, { competitors, label }] of Object.entries(COMPETITOR_MARKETS)) {
+    const marketComps = competitors.filter((c) => competitorData[c]);
+    if (marketComps.length === 0) continue;
+
+    const filename = `${sanitizeFilename(label)}.md`;
+    const filepath = join(MARKETS_DIR, filename);
+
+    const allMarketSignals = signals.filter((s) => s.market === market);
+    const painCount = allMarketSignals.filter((s) => s.type === "pain_point").length;
+    const altCount = allMarketSignals.filter((s) => s.type === "alternative_seeking").length;
+    const trendCount = allMarketSignals.filter((s) => s.type === "trend_signal").length;
+
+    const content = [
+      `# ${label} Market`,
+      "",
+      `> ${marketComps.length} competitors tracked | ${allMarketSignals.length} signals this period`,
+      "",
+      `## Players`,
+      "",
+      `| Company | Mentions | Pain Points | Positive | Score |`,
+      `|---|---|---|---|---|`,
+      ...marketComps.map((c) => {
+        const d = competitorData[c];
+        const pos = d.signals.filter((s) => s.type === "positive_signal").length;
+        const neg = d.signals.filter((s) => s.type === "pain_point").length;
+        const totalScore = d.mentions.reduce((sum, p) => sum + p.score, 0);
+        return `| [[${sanitizeFilename(c)}|${c}]] | ${d.mentions.length} | ${neg} | ${pos} | ${Math.round(totalScore)} |`;
+      }),
+      "",
+      `## Market Signals`,
+      `- 🔴 Pain points: ${painCount}`,
+      `- 🔍 Alternative seeking: ${altCount}`,
+      `- 🚀 Trends: ${trendCount}`,
+      "",
+      ...(altCount > 0 ? [
+        `## Opportunity Indicators`,
+        `- ${altCount} people looking for alternatives`,
+        `- Top pain: ${allMarketSignals.filter((s) => s.type === "pain_point").slice(0, 3).map((s) => `"${s.text.slice(0, 80)}"`).join(", ") || "none detected"}`,
+        "",
+      ] : []),
+      "---",
+      `Last updated: ${today}`,
+    ].join("\n");
+
+    writeFileSync(filepath, content);
+    dailyEntries.push(`- 🏭 Market: [[${sanitizeFilename(label)}|${label}]] — ${marketComps.length} competitors, ${allMarketSignals.length} signals`);
+    log(`   🏭 markets/${filename} (${marketComps.length} competitors)`);
+  }
+}
+
+// B5: Generate ideas from signals
+function generateIdeas(signals: Signal[], today: string, dailyEntries: string[]) {
+  ensureDir(IDEAS_DIR);
+
+  const ideas: { title: string; confidence: string; signals: string[]; related: string[] }[] = [];
+
+  // Pattern 1: Many pain points + alternative seeking for same competitor
+  const painByComp: Record<string, number> = {};
+  const altByComp: Record<string, number> = {};
+  for (const s of signals) {
+    if (!s.competitor) continue;
+    if (s.type === "pain_point") painByComp[s.competitor] = (painByComp[s.competitor] || 0) + 1;
+    if (s.type === "alternative_seeking") altByComp[s.competitor] = (altByComp[s.competitor] || 0) + 1;
+  }
+
+  for (const [comp, painCount] of Object.entries(painByComp)) {
+    const altCount = altByComp[comp] || 0;
+    if (painCount >= 2 || altCount >= 1) {
+      const topPain = signals.filter((s) => s.competitor === comp && s.type === "pain_point").slice(0, 3);
+      ideas.push({
+        title: `Better alternative to ${comp}`,
+        confidence: painCount >= 3 && altCount >= 2 ? "🟢 High" : "🟡 Medium",
+        signals: [
+          `${painCount} pain points detected`,
+          `${altCount} people seeking alternatives`,
+          ...topPain.map((s) => `"${s.text.slice(0, 100)}"`),
+        ],
+        related: [`[[${sanitizeFilename(comp)}]]`, `[[pain-point]]`, `[[alternative-seeking]]`],
+      });
+    }
+  }
+
+  // Pattern 2: Feature requests nobody addresses
+  const featureReqs = signals.filter((s) => s.type === "feature_request");
+  if (featureReqs.length >= 2) {
+    ideas.push({
+      title: "Feature gap: " + featureReqs[0].text.slice(0, 80),
+      confidence: featureReqs.length >= 5 ? "🟢 High" : "🟡 Medium",
+      signals: featureReqs.slice(0, 5).map((s) => `"${s.text.slice(0, 100)}" (${s.author})`),
+      related: [`[[feature-request]]`],
+    });
+  }
+
+  // Pattern 3: Trend signals (new API/launch = opportunity to build on top)
+  const trends = signals.filter((s) => s.type === "trend_signal");
+  for (const t of trends.slice(0, 3)) {
+    ideas.push({
+      title: `Build on: ${t.text.slice(0, 80)}`,
+      confidence: "🟡 Exploratory",
+      signals: [`"${t.text.slice(0, 150)}" — ${t.author}`],
+      related: [`[[trend-signal]]`],
+    });
+  }
+
+  if (ideas.length === 0) return;
+
+  const content = [
+    `# 💡 Business Ideas`,
+    "",
+    `> Auto-generated from ${signals.length} market signals. Last updated: ${today}`,
+    `> Review and validate before acting.`,
+    "",
+    ...ideas.map((idea, i) => [
+      `## ${i + 1}. ${idea.title}`,
+      `**Confidence:** ${idea.confidence}`,
+      "",
+      `**Signals:**`,
+      ...idea.signals.map((s) => `- ${s}`),
+      "",
+      `**Related:** ${idea.related.join(" | ")}`,
+      "",
+    ].join("\n")),
+    "---",
+    `Generated: ${today} | Based on ${signals.length} signals`,
+  ].join("\n");
+
+  writeFileSync(join(IDEAS_DIR, "auto-generated.md"), content);
+  dailyEntries.push(`- 💡 ${ideas.length} business ideas generated`);
+  log(`   💡 ideas/auto-generated.md (${ideas.length} ideas)`);
 }
 
 // ── Topic extraction ───────────────────────────────────────
