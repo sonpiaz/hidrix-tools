@@ -216,6 +216,28 @@ const TOOL_SCHEMAS: Record<string, { label: string; description: string; promptS
       w_recency: Type.Optional(Type.Number({ description: "Weight for recency (0-1)", default: 0.1 })),
     }),
   },
+
+  "linkedin-search": {
+    label: "LinkedIn Search",
+    description: "Search LinkedIn posts by keyword with engagement data. No login needed.",
+    promptSnippet: "Search LinkedIn posts with engagement data",
+    parameters: Type.Object({
+      query: Type.String({ description: "Search keywords. Comma-separate for multiple queries." }),
+      max_posts: Type.Optional(Type.Number({ description: "Max posts (1-100)", default: 20 })),
+      sort: Type.Optional(StringEnum(["engagement", "recent", "reactions", "comments"] as const, { default: "engagement" })),
+      date_filter: Type.Optional(StringEnum(["any", "past-24h", "past-week", "past-month"] as const, { default: "any" })),
+      min_engagement: Type.Optional(Type.Number({ description: "Min engagement threshold", default: 0 })),
+    }),
+  },
+  "linkedin-profile": {
+    label: "LinkedIn Profile",
+    description: "Get recent posts from a LinkedIn profile with engagement data. No login needed.",
+    promptSnippet: "Get LinkedIn profile's recent posts",
+    parameters: Type.Object({
+      profile_url: Type.String({ description: "LinkedIn profile URL or username" }),
+      max_posts: Type.Optional(Type.Number({ description: "Max posts (1-50)", default: 20 })),
+    }),
+  },
   "content-analyzer": {
     label: "Content Analyzer",
     description: "Analyze posts for topic clusters, content patterns, posting time trends, and author leaderboard.",
