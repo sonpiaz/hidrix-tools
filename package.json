@@ -1,14 +1,16 @@
 {
   "name": "hidrix-tools",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "bun run server.ts",
-    "dev": "bun --watch server.ts"
+    "start:http": "bun run server.ts --http",
+    "dev": "bun --watch server.ts",
+    "dev:http": "bun --watch server.ts --http"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@mozilla/readability": "^0.5.0",
     "linkedom": "^0.18.0"
   }

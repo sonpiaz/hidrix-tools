@@ -1,0 +1,11 @@
+{
+  "mcp": {
+    "servers": {
+      "hidrix-tools": {
+        "command": "bun",
+        "args": ["run", "/Users/sonpiaz/hidrix-tools/server.ts"],
+        "transport": "stdio"
+      }
+    }
+  }
+}

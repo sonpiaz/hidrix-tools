@@ -1,0 +1,16 @@
+# Hermes MCP integration for hidrix-tools
+# Add this to ~/.hermes/config.yaml under mcp_servers:
+
+mcp_servers:
+  hidrix-tools:
+    command: bun
+    args:
+      - run
+      - /Users/sonpiaz/hidrix-tools/server.ts
+    # Optional: filter which tools are exposed
+    # tools:
+    #   include:
+    #     - web_search
+    #     - web_fetch
+    #     - x_search
+    #     - reddit_search

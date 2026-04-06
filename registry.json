@@ -4,8 +4,12 @@
   "description": "MCP tool server that gives any AI agent the ability to search, scrape, and analyze content across the internet.",
   "repository": "https://github.com/sonpiaz/hidrix-tools",
   "protocol": "mcp",
+  "transports": ["stdio", "streamable-http"],
   "integrations": [
     "claude-code",
+    "cursor",
+    "windsurf",
+    "continue",
     "pi",
     "openclaw",
     "hermes",

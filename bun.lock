@@ -5,7 +5,7 @@
     "": {
       "name": "hidrix-tools",
       "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.27.1",
+        "@modelcontextprotocol/sdk": "^1.29.0",
         "@mozilla/readability": "^0.5.0",
         "linkedom": "^0.18.0",
       },

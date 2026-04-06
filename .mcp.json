@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "hidrix-tools": {
+      "command": "bun",
+      "args": ["run", "server.ts"],
+      "cwd": "."
+    }
+  }
+}
