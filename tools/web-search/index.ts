@@ -110,6 +110,6 @@ export const definition: ToolDefinition = {
     query: z.string().describe("Search query"),
     count: z.number().min(1).max(20).default(5).describe("Number of results (1-20)"),
   },
-  envVars: ["BRAVE_API_KEY", "TAVILY_API_KEY"],
+  envVars: ["BRAVE_API_KEY"],
   execute,
 };
