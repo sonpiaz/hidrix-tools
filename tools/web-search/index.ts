@@ -9,12 +9,6 @@ interface SearchResult {
   description: string;
 }
 
-interface BraveResult {
-  title: string;
-  url: string;
-  description: string;
-}
-
 function formatResults(results: SearchResult[], query: string): string {
   if (results.length === 0) return `No results found for: "${query}"`;
   return results
@@ -42,7 +36,7 @@ async function searchBrave(query: string, count: number): Promise<SearchResult[]
     throw new Error(`Brave Search error: ${response.status} ${response.statusText}`);
   }
 
-  const data = (await response.json()) as { web?: { results?: BraveResult[] } };
+  const data = (await response.json()) as { web?: { results?: SearchResult[] } };
   return (data.web?.results ?? []).map((r) => ({
     title: r.title,
     url: r.url,
@@ -81,8 +75,12 @@ async function execute({ query, count }: { query: string; count: number }): Prom
     } catch (err) {
       // Fall back to Brave if Tavily fails and BRAVE_API_KEY is available
       if (process.env.BRAVE_API_KEY) {
-        const results = await searchBrave(query, count);
-        return formatResults(results, query);
+        try {
+          const results = await searchBrave(query, count);
+          return formatResults(results, query);
+        } catch {
+          // Both providers failed; return original Tavily error
+        }
       }
       return `Tavily Search error: ${err instanceof Error ? err.message : String(err)}`;
     }
@@ -112,6 +110,6 @@ export const definition: ToolDefinition = {
     query: z.string().describe("Search query"),
     count: z.number().min(1).max(20).default(5).describe("Number of results (1-20)"),
   },
-  envVars: ["BRAVE_API_KEY"],
+  envVars: ["BRAVE_API_KEY", "TAVILY_API_KEY"],
   execute,
 };
