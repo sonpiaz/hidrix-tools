@@ -92,6 +92,19 @@ mcp_servers:
       - /path/to/hidrix-tools/server.ts
 ```
 
+For native Hermes Agent X/Twitter automation, you can run
+[Hermes Tweet](https://github.com/Xquik-dev/hermes-tweet) beside hidrix-tools:
+
+```bash
+hermes plugins install Xquik-dev/hermes-tweet --enable
+```
+
+Set `XQUIK_API_KEY` in your Hermes environment. Keep hidrix-tools connected for
+web, Reddit, YouTube, TikTok, LinkedIn, and multi-source MCP research. Use
+Hermes Tweet when the workflow needs to scrape/search tweets, search Twitter/X,
+read tweet replies, look up users, monitor tweets, export followers, or perform
+confirmation-gated post tweets/replies, send DMs, and automate X actions.
+
 ### Pi Agent (native extension, no MCP)
 
 Pi does not support MCP. Use the native extension bridge:
