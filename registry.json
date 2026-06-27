@@ -52,6 +52,56 @@
       }
     },
     {
+      "name": "sofya_search",
+      "category": "search",
+      "description": "Search the web using Sofya. Returns full page content for each result, not just snippets, with an optional AI-synthesized answer.",
+      "provider": "Sofya",
+      "cost": "1-3 credits/search (+5 with answer)",
+      "envVars": [
+        "SOFYA_API_KEY"
+      ],
+      "chain": {
+        "suggested_next": [
+          "sofya_extract",
+          "web_fetch"
+        ],
+        "feeds_from": []
+      }
+    },
+    {
+      "name": "sofya_extract",
+      "category": "scrape",
+      "description": "Extract specific information from a web page with Sofya. Give a URL and a prompt describing what to pull out, such as pricing, contacts, or specifications.",
+      "provider": "Sofya",
+      "cost": "5 credits/call",
+      "envVars": [
+        "SOFYA_API_KEY"
+      ],
+      "chain": {
+        "suggested_next": [
+          "content_analyzer"
+        ],
+        "feeds_from": [
+          "web_search",
+          "sofya_search"
+        ]
+      }
+    },
+    {
+      "name": "sofya_research",
+      "category": "search",
+      "description": "Deep research with Sofya. Breaks a question into sub-queries, searches multiple sources, and returns a synthesized, cited report.",
+      "provider": "Sofya",
+      "cost": "25 credits/call",
+      "envVars": [
+        "SOFYA_API_KEY"
+      ],
+      "chain": {
+        "suggested_next": [],
+        "feeds_from": []
+      }
+    },
+    {
       "name": "x_search",
       "category": "search",
       "description": "Search X/Twitter posts with full engagement data (likes, retweets, replies, views). Supports advanced operators.",
