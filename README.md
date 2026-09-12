@@ -47,7 +47,7 @@ Your AI Agent                    hidrix-tools                     Internet
 | Agent / Platform | Setup | Status |
 |---|---|---|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) / Claude Desktop | `settings.json` → mcpServers | ✅ Tested |
-| [pi](https://github.com/mariozechner/pi-coding-agent) | Native extension (no MCP) | ✅ Tested |
+| [pi](https://github.com/badlogic/pi-mono) | Native extension (no MCP) | ✅ Tested |
 | [OpenClaw](https://github.com/openclaw/openclaw) | `openclaw.json` → mcp_servers | ✅ Compatible |
 | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | `config.yaml` → mcp_servers | ✅ Compatible |
 | [Cursor](https://cursor.sh) | MCP settings | ✅ Compatible |
