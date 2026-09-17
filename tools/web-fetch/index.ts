@@ -7,12 +7,14 @@
  *   - JS-rendered page fallback via Apify web scraper (optional)
  *   - Better error messages
  *
- * Provider: Mozilla Readability (built-in), Apify (optional fallback)
+ * Provider: Mozilla Readability (built-in), Tavily Extract (optional), Apify (optional fallback)
  */
 
 import { z } from "zod";
 import type { ToolDefinition } from "../../lib/tool-registry.js";
 import { extractContent, truncateText } from "../../lib/readability.js";
+
+type FetchProvider = "readability" | "tavily" | "apify";
 
 const MAX_RESPONSE_BYTES = 2_000_000;
 
@@ -146,6 +148,37 @@ async function fetchViaApify(url: string, maxChars: number): Promise<string | nu
   }
 }
 
+// ── Tavily Extract ──────────────────────────────────────────
+
+async function fetchViaTavily(url: string, maxChars: number): Promise<string | null> {
+  if (!process.env.TAVILY_API_KEY) return null;
+
+  try {
+    const { tavily } = await import("@tavily/core");
+    const client = tavily({ apiKey: process.env.TAVILY_API_KEY });
+
+    const response = await client.extract([url], {
+      extractDepth: "advanced",
+      format: "markdown",
+    });
+
+    if (!response.results || response.results.length === 0) return null;
+
+    const item = response.results[0];
+    const rawContent = item.raw_content || "";
+    if (!rawContent) return null;
+
+    const sections: string[] = [];
+    if (item.url) sections.push(`Source: ${item.url}`);
+    sections.push("");
+    sections.push(rawContent);
+
+    return truncateText(sections.join("\n"), maxChars);
+  } catch {
+    return null;
+  }
+}
+
 // ── Main execute ───────────────────────────────────────────
 
 async function execute(params: Record<string, any>): Promise<string> {
@@ -153,6 +186,7 @@ async function execute(params: Record<string, any>): Promise<string> {
   const maxChars = (params.max_chars as number) || 50000;
   const includeMetadata = (params.extract_metadata as boolean) ?? true;
   const jsRender = (params.js_render as boolean) || false;
+  const fetchProvider = ((process.env.FETCH_PROVIDER as FetchProvider) || "readability");
 
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
     return `Invalid URL: must start with http:// or https://`;
@@ -163,6 +197,13 @@ async function execute(params: Record<string, any>): Promise<string> {
     const tweetContent = await fetchXTweet(url);
     if (tweetContent) return truncateText(tweetContent, maxChars);
     // Fall through to normal fetch if GetXAPI not available
+  }
+
+  // Tavily Extract: use when FETCH_PROVIDER=tavily
+  if (fetchProvider === "tavily") {
+    const tavilyResult = await fetchViaTavily(url, maxChars);
+    if (tavilyResult) return tavilyResult;
+    // Fall through to Readability if Tavily fails
   }
 
   // Normal fetch
@@ -201,6 +242,12 @@ async function execute(params: Record<string, any>): Promise<string> {
 
   const result = await extractContent(html, url);
 
+  // If Readability yields very little content, try Tavily before Apify
+  if (result.content.length < 200 && fetchProvider !== "tavily" && process.env.TAVILY_API_KEY) {
+    const tavilyResult = await fetchViaTavily(url, maxChars);
+    if (tavilyResult) return tavilyResult;
+  }
+
   // Build header with metadata
   const sections: string[] = [];
 
@@ -233,6 +280,7 @@ export const definition: ToolDefinition = {
     "Fetch a URL and extract readable content as markdown.",
     "Extracts metadata (author, date, tags, reading time).",
     "Handles X/Twitter URLs specially (shows tweet with engagement).",
+    "Optional Tavily Extract for JS-heavy pages (set FETCH_PROVIDER=tavily).",
     "Optional JS rendering for SPA/paywalled pages (requires APIFY_API_TOKEN).",
   ].join(" "),
   params: {
