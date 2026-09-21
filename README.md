@@ -61,6 +61,8 @@ Your AI Agent                    hidrix-tools                     Internet
 | Tool | Source | What it does |
 |------|--------|-------------|
 | `web_search` | Brave Search | Search the web — titles, URLs, descriptions |
+| `sofya_search` | Sofya | Search the web and get full page content, not just snippets, with an optional AI answer |
+| `sofya_research` | Sofya | Deep research across many sources, returns a synthesized cited report |
 | `x_search` | GetXAPI / RapidAPI | Search X/Twitter with engagement data (likes, retweets, views) |
 | `x_thread_reader` | GetXAPI | Read full X threads, articles, and tweet replies |
 | `x_user_posts` | GetXAPI | Get recent posts from a specific X user with engagement |
@@ -75,6 +77,7 @@ Your AI Agent                    hidrix-tools                     Internet
 | Tool | Source | What it does |
 |------|--------|-------------|
 | `web_fetch` | Mozilla Readability | Fetch any URL → clean readable markdown |
+| `sofya_extract` | Sofya | Pull specific data from a page with a prompt (pricing, contacts, specs) |
 | `facebook_scraper` | Apify + Meta API | Scrape FB groups, pages, keyword search, or Meta Ad Library |
 
 ### Analyze
