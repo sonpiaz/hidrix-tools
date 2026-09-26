@@ -61,6 +61,7 @@ Your AI Agent                    hidrix-tools                     Internet
 | Tool | Source | What it does |
 |------|--------|-------------|
 | `web_search` | Brave Search | Search the web — titles, URLs, descriptions |
+| `youcom_search` | You.com | Search the web — alternative to web_search, uses You.com API |
 | `x_search` | GetXAPI / RapidAPI | Search X/Twitter with engagement data (likes, retweets, views) |
 | `x_thread_reader` | GetXAPI | Read full X threads, articles, and tweet replies |
 | `x_user_posts` | GetXAPI | Get recent posts from a specific X user with engagement |
@@ -200,6 +201,7 @@ Tools are auto-skipped if their API keys are missing — only configure what you
 | Key | Tools | Free Tier | Get it |
 |-----|-------|-----------|--------|
 | `BRAVE_API_KEY` | web_search | 2,000 queries/month | [api.search.brave.com](https://api.search.brave.com) |
+| `YDC_API_KEY` | youcom_search | 100 queries/day (free tier) | [you.com/platform/api-keys](https://you.com/platform/api-keys) |
 | `GETXAPI_KEY` | x_search, x_thread_reader, x_user_posts | $0.001/call, no subscription | [getxapi.com](https://getxapi.com) |
 | `RAPIDAPI_KEY` | x_search (fallback), reddit_search, youtube_search, tiktok_search | Varies | [rapidapi.com](https://rapidapi.com) |
 | `SUPADATA_API_KEY` | youtube_channel (primary) | Paid from $9/mo | [supadata.ai](https://supadata.ai) |
@@ -227,6 +229,7 @@ hidrix-tools/
 ├── tools/
 │   ├── _template/             — Copy this to create a new tool
 │   ├── web-search/            — Brave Search
+│   ├── youcom-search/         — You.com Search
 │   ├── web-fetch/             — URL → markdown
 │   ├── x-search/              — X/Twitter search (GetXAPI + RapidAPI fallback)
 │   ├── x-thread-reader/       — Read X threads & articles
@@ -270,7 +273,8 @@ hidrix-tools/
 | [Bun](https://bun.sh/) | Runtime |
 | [TypeScript](https://typescriptlang.org/) | Language |
 | [MCP SDK](https://modelcontextprotocol.io/) | Agent protocol |
-| [Brave Search](https://brave.com/search/api/) | Web search |
+| [Brave Search](https://brave.com/search/api/) | Web search (default) |
+| [You.com Search](https://you.com/platform/api-keys) | Web search (alternative) |
 | [Mozilla Readability](https://github.com/mozilla/readability) | Content extraction |
 | [Apify](https://apify.com/) | Facebook scraping |
 | [Meta Ad Library API](https://www.facebook.com/ads/library/api/) | Ad intelligence (free) |

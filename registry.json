@@ -34,6 +34,22 @@
       }
     },
     {
+      "name": "youcom_search",
+      "category": "search",
+      "description": "Search the web using You.com. Returns titles, URLs, and snippets. Alternative to web_search.",
+      "provider": "You.com",
+      "cost": "free (100 queries/day with free API key)",
+      "envVars": [
+        "YDC_API_KEY"
+      ],
+      "chain": {
+        "suggested_next": [
+          "web_fetch"
+        ],
+        "feeds_from": []
+      }
+    },
+    {
       "name": "web_fetch",
       "category": "scrape",
       "description": "Fetch a URL and extract readable content as markdown. Extracts metadata (author, date, tags). Handles X/Twitter URLs specially.",
